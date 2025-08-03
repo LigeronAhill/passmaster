@@ -42,20 +42,20 @@ fn main() -> Result<()> {
 
     // Проверка/установка мастер-пароля
     let master_password = Zeroizing::new(if let Some(mph) = get_master_pass(&conn)? {
-        let input = Zeroizing::new(prompt_password("Введите мастер-пароль: ")?);
+        let input = Zeroizing::new(prompt_password("Введите 🗝️  мастер-пароль: ")?);
         if Argon2::default()
             .verify_password(input.as_bytes(), &PasswordHash::new(&mph)?)
             .is_err()
         {
-            return Err(eyre!("Неверный мастер-пароль"));
+            return Err(eyre!("❌ Неверный мастер-пароль"));
         }
         input
     } else {
-        let new_master = Zeroizing::new(prompt_password("Создайте мастер-пароль: ")?);
-        let confirm = Zeroizing::new(prompt_password("Подтвердите мастер-пароль: ")?);
+        let new_master = Zeroizing::new(prompt_password("Создайте  🗝️  мастер-пароль: ")?);
+        let confirm = Zeroizing::new(prompt_password("Подтвердите  🗝️  мастер-пароль: ")?);
 
         if new_master != confirm {
-            return Err(eyre!("Пароли не совпадают"));
+            return Err(eyre!("❌ Пароли не совпадают"));
         }
 
         let salt = SaltString::generate(&mut ArgonOsRng);
@@ -66,14 +66,14 @@ fn main() -> Result<()> {
         new_master
     });
 
-    println!("Добро пожаловать в менеджер паролей!");
+    println!("Добро пожаловать в менеджер паролей! 🧑‍💼");
     loop {
-        println!("\nМеню:");
-        println!("1. Добавить пароль");
-        println!("2. Получить пароль");
-        println!("3. Удалить пароль");
-        println!("4. Сгенерировать пароль");
-        println!("5. Выход");
+        println!("\n📱 Меню:");
+        println!("1. 🆕 Добавить пароль");
+        println!("2. 🎁 Получить пароль");
+        println!("3. ☠️  Удалить пароль");
+        println!("4. 🔐 Сгенерировать пароль");
+        println!("5. ⛔ Выход");
 
         print!("Выберите действие: ");
         io::stdout().flush()?;
@@ -179,7 +179,7 @@ fn decrypt_password(
     let plaintext = cipher
         .decrypt(nonce, ciphertext)
         .map_err(|e| eyre!(e.to_string()))?;
-    String::from_utf8(plaintext).map_err(|e| eyre!("Ошибка UTF-8: {}", e))
+    String::from_utf8(plaintext).map_err(|e| eyre!("Ошибка UTF-8: {e}"))
 }
 
 fn add_password(conn: &Connection, master_password: &str) -> Result<()> {
@@ -212,7 +212,7 @@ fn add_password(conn: &Connection, master_password: &str) -> Result<()> {
         params![service, login, ciphertext, salt, nonce],
     )?;
 
-    println!("Пароль успешно добавлен для сервиса {}", service);
+    println!("Пароль успешно добавлен для сервиса {service}");
     Ok(())
 }
 
@@ -242,7 +242,11 @@ fn get_password(conn: &Connection, master_password: &str) -> Result<()> {
 
     println!("Список сервисов:");
     for pwd in &passwords {
-        println!("ID: {} - Сервис: {}", pwd.id, pwd.service);
+        println!(
+            "ID: {id} ✨ Сервис: {service}",
+            id = pwd.id,
+            service = pwd.service
+        );
     }
 
     print!("Введите ID сервиса: ");
@@ -259,7 +263,7 @@ fn get_password(conn: &Connection, master_password: &str) -> Result<()> {
             &pwd.nonce,
         )?;
 
-        println!("\nДанные для сервиса {}:", pwd.service);
+        println!("\nДанные для сервиса {service}:", service = pwd.service);
         println!("Логин: {login}", login = pwd.login);
         // println!("Пароль: {decrypted}");
         println!("Пароль: ищите в буфере обмена в течении 30 секунд...");
@@ -294,7 +298,11 @@ fn delete_password(conn: &Connection) -> Result<()> {
 
     println!("Список сервисов:");
     for pwd in &passwords {
-        println!("ID: {} - Сервис: {}", pwd.id, pwd.service);
+        println!(
+            "ID: {id} ✨ Сервис: {service}",
+            id = pwd.id,
+            service = pwd.service
+        );
     }
 
     print!("Введите ID сервиса для удаления: ");
@@ -310,7 +318,8 @@ fn delete_password(conn: &Connection) -> Result<()> {
 
 fn generate_password() -> Result<()> {
     let password = generate_password_internal()?;
-    println!("Сгенерированный пароль: {}", password);
+    // println!("Сгенерированный пароль: {password}");
+    println!("Сгенерированный пароль: ищите в буфере обмена в течении 30 секунд...");
 
     if let Ok(mut ctx) = ClipboardContext::new() {
         ctx.set_contents(password.clone())
